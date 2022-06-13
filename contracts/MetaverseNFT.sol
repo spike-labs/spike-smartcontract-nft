@@ -27,8 +27,20 @@ contract MetaverseNFT is ERC721, ERC2981, Ownable {
     }
 
     function mint(uint256 tokenId) external {
-        require(baseNFT.ownerOf(tokenId) == msg.sender, "Mint for invalid tokenId");
-        _safeMint(msg.sender, tokenId);
+        mintInternal(msg.sender, tokenId);
+    }
+
+    function batchMint(address to, uint256[] memory tokenIds) external {
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            mintInternal(to, tokenIds[i]);
+        }
+    }
+
+    function mintInternal(address to, uint256 tokenId) internal {
+        require(baseNFT.ownerOf(tokenId) == to, "Mint for invalid tokenId");
+        require(!_exists(tokenId), "Already minted");
+        
+        _safeMint(to, tokenId);
     }
     
     /**
