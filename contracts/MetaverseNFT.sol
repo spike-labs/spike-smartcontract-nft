@@ -7,16 +7,26 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-
+/**
+ * @dev Allow user to mint one metaverse version of NFT for each associated base NFT.
+ */
 contract MetaverseNFT is ERC721, ERC2981, Ownable {
     string private _baseTokenURI;
     IERC721 public baseNFT;
+    bool public saleIsActive = false;
+    uint256 public basePrice;
+    address public fundManager;
 
      // Optional mapping for token URIs
     mapping(uint256 => string) private _tokenURIs;
 
+    event RolledOver(bool status);
+    event PriceChanged(uint256 oldPrice, uint256 newPrice);
+    event FundManagerChanged(address oldFundManager, address newFundManager);
+
     constructor(string memory name, string memory symbol, IERC721 _baseNFT) ERC721(name, symbol) {
         baseNFT = _baseNFT;
+        fundManager = msg.sender;
     }
 
     /**
@@ -26,20 +36,25 @@ contract MetaverseNFT is ERC721, ERC2981, Ownable {
         return super.supportsInterface(interfaceId);
     }
 
-    function mint(uint256 tokenId) external {
+    function mint(uint256 tokenId) external payable {
+        require(msg.value == basePrice, "Invalid payment");
+
         mintInternal(msg.sender, tokenId);
     }
 
-    function batchMint(address to, uint256[] memory tokenIds) external {
+    function batchMint(address to, uint256[] memory tokenIds) external payable {
+        require(msg.value == basePrice * tokenIds.length, "Invalid payment");
+
         for (uint256 i = 0; i < tokenIds.length; i++) {
             mintInternal(to, tokenIds[i]);
         }
     }
 
     function mintInternal(address to, uint256 tokenId) internal {
+        require(saleIsActive, "Sale is not active");
         require(baseNFT.ownerOf(tokenId) == to, "Mint for invalid tokenId");
         require(!_exists(tokenId), "Already minted");
-        
+
         _safeMint(to, tokenId);
     }
     
@@ -57,6 +72,30 @@ contract MetaverseNFT is ERC721, ERC2981, Ownable {
         }
 
         return super.tokenURI(tokenId);
+    }
+
+    function withdraw() external {
+        require(msg.sender == fundManager, "Invalid fund manager");
+
+        uint balance = address(this).balance;
+        Address.sendValue(payable(msg.sender), balance);
+    }
+
+    function flipSaleState() external onlyOwner {
+        saleIsActive = !saleIsActive;
+        emit RolledOver(saleIsActive);
+    }
+
+    function setBasePrice(uint256 newBasePrice) external onlyOwner {
+        emit PriceChanged(basePrice, newBasePrice);
+
+        basePrice = newBasePrice;
+    }
+
+    function setFundManager(address newFundManager) external onlyOwner {
+        emit FundManagerChanged(fundManager, newFundManager);
+
+        fundManager = newFundManager;
     }
 
     function setDefaultRoyalty(address receiver, uint96 feeNumerator) external onlyOwner {
