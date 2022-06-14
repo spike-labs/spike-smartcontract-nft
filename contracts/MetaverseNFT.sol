@@ -11,13 +11,18 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * @dev Allow user to mint one metaverse version of NFT for each associated base NFT.
  */
 contract MetaverseNFT is ERC721, ERC2981, Ownable {
+    // Used to construct tokenURI together with token id
     string private _baseTokenURI;
+    // The original NFT which the metaverse NFT will be minted on
     IERC721 public baseNFT;
+    // Allow to mint when the value is true
     bool public saleIsActive = false;
+    // The eth required to mint one NFT
     uint256 public basePrice;
+    // The account has permission to withdraw user paid eth
     address public fundManager;
 
-     // Optional mapping for token URIs
+    // Optional mapping for token URIs
     mapping(uint256 => string) private _tokenURIs;
 
     event RolledOver(bool status);
