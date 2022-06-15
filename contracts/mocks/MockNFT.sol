@@ -3,6 +3,7 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
+import "../MetaverseNFT.sol";
 
 contract MockNFT is ERC721PresetMinterPauserAutoId {
     constructor(string memory name, string memory symbol) ERC721PresetMinterPauserAutoId(name, symbol, "") {
@@ -13,4 +14,6 @@ contract MockNFT is ERC721PresetMinterPauserAutoId {
             super.mint(msg.sender);
         }
     }
+
+
 }

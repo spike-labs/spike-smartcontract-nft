@@ -134,4 +134,16 @@ contract MetaverseNFT is ERC721, ERC2981, Ownable {
     function _baseURI() internal view virtual override returns (string memory) {
         return _baseTokenURI;
     }
+
+    function getFundManager() public view  returns (address){
+        return fundManager;
+    }
+
+    function getBasePrice() public view  returns (uint256){
+        return basePrice;
+    }
+
+    function getSaleState() public view  returns (bool){
+        return saleIsActive;
+    }
 }
