@@ -14,8 +14,9 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
+  const azukiAddress = "0xb74bf94049d2c01f8805b8b15db0909168cabf46"
   const MetaverseNFT = await hre.ethers.getContractFactory("MetaverseNFT");
-  const metaverseNFT = await MetaverseNFT.deploy("Azuki for Metaverse", "AzukiM");
+  const metaverseNFT = await MetaverseNFT.deploy("Azuki for Metaverse", "AzukiM", azukiAddress);
 
   await metaverseNFT.deployed();
 
