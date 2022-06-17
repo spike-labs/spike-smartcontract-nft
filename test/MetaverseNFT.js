@@ -71,6 +71,16 @@ describe("MetaverseNFT", function () {
     await metaverseNFT.setFundManager(owner.address);
     expect(await metaverseNFT.fundManager()).to.equal(owner.address);
   });
+  // Royalty
+  it("Is the  royalty designed correctly?", async function () {
+    await metaverseNFT.setDefaultRoyalty(owner.address, 1);
+    let returnValues = await metaverseNFT.royaltyInfo(4, 10);
+    expect(owner.address).to.equal(await returnValues[0]);
+
+    await metaverseNFT.setTokenRoyalty(1, addr1.address, 1);
+    returnValues = await metaverseNFT.royaltyInfo(1, 10);
+    expect(addr1.address).to.equal(await returnValues[0]);
+  });
 
   describe("Event test", function () {
     it("owner emit test", async () => {
