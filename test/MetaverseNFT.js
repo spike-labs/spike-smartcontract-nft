@@ -49,10 +49,11 @@ describe("MetaverseNFT", function () {
   });
   // withdraw
   it("Should withdraw properly with existing address", async function () {
-    // todo At present, there is no paid contract, and the withdrawal contract cannot be tested.
-    // const beforeBalance = owner.address;
-    // await metaverseNFT.withdraw();
-    // expect(owner.balance).to.lessThanOrEqual(beforeBalance);
+    await metaverseNFT.setFundManager(owner.address);
+    await metaverseNFT.mint(5);
+    const withdrawBeforeBalance = await owner.getBalance();
+    await metaverseNFT.withdraw();
+    expect(await owner.getBalance()).to.above(withdrawBeforeBalance);
   });
   // flipSaleState
   it("So that SaleState is correctly modified", async function () {
