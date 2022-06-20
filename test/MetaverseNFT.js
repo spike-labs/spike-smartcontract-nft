@@ -4,14 +4,14 @@ const { ethers } = require("hardhat");
 describe("MetaverseNFT", function () {
   let mockNFT;
   let metaverseNFT;
-  let owner;
+  let owner, addr1;
   const zeroAddress = "0x0000000000000000000000000000000000000000";
   before(async function () {
-    [owner] = await ethers.getSigners();
+    [owner, addr1] = await ethers.getSigners();
     console.log("owner: ", owner.address);
     const mockNFTFactory = await ethers.getContractFactory("MockNFT");
     mockNFT = await mockNFTFactory.deploy("MockNFT", "MockNFT");
-    await mockNFT.batchMint(5);
+    await mockNFT.batchMint(6);
 
     const metaverseNFTFactory = await ethers.getContractFactory("MetaverseNFT");
     metaverseNFT = await metaverseNFTFactory.deploy(
@@ -49,11 +49,23 @@ describe("MetaverseNFT", function () {
   });
   // withdraw
   it("Should withdraw properly with existing address", async function () {
+    await metaverseNFT.setBasePrice(ethers.utils.parseEther("1.0"));
     await metaverseNFT.setFundManager(owner.address);
-    await metaverseNFT.mint(5);
-    const withdrawBeforeBalance = await owner.getBalance();
-    await metaverseNFT.withdraw();
-    expect(await owner.getBalance()).to.above(withdrawBeforeBalance);
+    await metaverseNFT.mint(5, {
+      value: ethers.utils.parseEther("1.0"),
+    });
+    console.log(
+      "before withdraw contract balance: ",
+      await metaverseNFT.provider.getBalance(metaverseNFT.address)
+    );
+    await expect(await metaverseNFT.withdraw()).to.changeEtherBalance(
+      owner,
+      ethers.utils.parseEther("1.0")
+    );
+    console.log(
+      "after withdraw contract balance: ",
+      await metaverseNFT.provider.getBalance(metaverseNFT.address)
+    );
   });
   // flipSaleState
   it("So that SaleState is correctly modified", async function () {
