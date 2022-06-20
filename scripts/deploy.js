@@ -4,6 +4,7 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
+const helper = require("./helper");
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -12,15 +13,20 @@ async function main() {
   // If this script is run directly using `node` you may want to call compile
   // manually to make sure everything is compiled
   // await hre.run('compile');
+  const networkName = hre.network.name
+  console.log("networkName: ", networkName)
 
-  // We get the contract to deploy
-  const azukiAddress = "0xb74bf94049d2c01f8805b8b15db0909168cabf46"
-  const MetaverseNFT = await hre.ethers.getContractFactory("MetaverseNFT");
-  const metaverseNFT = await MetaverseNFT.deploy("Azuki for Metaverse", "AzukiM", azukiAddress);
-
-  await metaverseNFT.deployed();
-
-  console.log("MetaverseNFT deployed to:", metaverseNFT.address);
+  let baseNFTAddress
+  if (networkName == "hardhat") {
+    const mockNFTFactory = await hre.ethers.getContractFactory("MockNFT")
+    const mockNFTInstance = await mockNFTFactory.deploy("MockNFT", "MockNFT")
+    await mockNFTInstance.deployed();
+    baseNFTAddress = mockNFTInstance.address;
+  }
+  if (networkName == "rinkeby") {
+    baseNFTAddress = "0xb74bf94049d2c01f8805b8b15db0909168cabf46"
+  }
+  await helper.deploy(networkName, baseNFTAddress)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
